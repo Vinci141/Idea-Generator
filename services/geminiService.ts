@@ -36,11 +36,17 @@ const responseSchema = {
   },
 };
 
-export async function generateIdeas(prompt: string): Promise<Idea[]> {
+export async function generateIdeas(prompt: string, existingTitles: string[] = []): Promise<Idea[]> {
   try {
+    let fullPrompt = `Generate 3 innovative and detailed project ideas based on the following topic: "${prompt}". For each idea, you must provide: a title, a comprehensive description, a list of relevant technology tags, and a detailed, actionable, step-by-step guide for implementation. Also include an optional brief code sample to illustrate a core concept.`;
+
+    if (existingTitles.length > 0) {
+      fullPrompt += `\n\nPlease ensure these new ideas are distinct and different from the ones already provided: "${existingTitles.join('", "')}".`;
+    }
+
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents: `Generate 3 innovative project ideas based on the following topic: "${prompt}". For each idea, provide a title, a detailed description, a list of relevant technology tags, a list of actionable steps to implement the project, and an optional brief code sample to illustrate a core concept.`,
+      contents: fullPrompt,
       config: {
         responseMimeType: "application/json",
         responseSchema: responseSchema,

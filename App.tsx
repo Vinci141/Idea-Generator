@@ -1,4 +1,3 @@
-
 // FIX: Implemented the main App component to resolve "Cannot find name" errors and provide the application structure.
 import React, { useState } from 'react';
 import { InputForm } from './components/InputForm';
@@ -9,6 +8,7 @@ import { Idea } from './types';
 
 function App() {
   const [prompt, setPrompt] = useState<string>('');
+  const [activePrompt, setActivePrompt] = useState<string>('');
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,14 +18,34 @@ function App() {
 
     setIsLoading(true);
     setError(null);
-    setIdeas([]); // Clear previous ideas
+    setIdeas([]); // Clear previous ideas for a new search
 
     try {
       const generatedIdeas = await generateIdeas(prompt);
       setIdeas(generatedIdeas);
+      setActivePrompt(prompt); // Set the active prompt for "load more"
       setPrompt(''); // Clear input on success
     } catch (e) {
       setError('Sorry, something went wrong while generating ideas. Please try again.');
+      console.error(e);
+      setActivePrompt('');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleLoadMore = async () => {
+    if (!activePrompt || isLoading) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const existingTitles = ideas.map((idea) => idea.title);
+      const newIdeas = await generateIdeas(activePrompt, existingTitles);
+      setIdeas((prevIdeas) => [...prevIdeas, ...newIdeas]);
+    } catch (e) {
+      setError('Sorry, something went wrong while loading more ideas. Please try again.');
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -56,19 +76,40 @@ function App() {
         </div>
 
         <div className="mt-12 max-w-4xl mx-auto">
-          {isLoading && <Loader />}
+          {isLoading && ideas.length === 0 && <Loader />}
           {error && <p className="text-center text-red-400 bg-red-900/20 p-4 rounded-lg">{error}</p>}
-          {!isLoading && ideas.length > 0 && (
+          
+          {ideas.length > 0 && (
             <div className="grid gap-8">
               {ideas.map((idea, index) => (
                 <IdeaCard key={index} idea={idea} />
               ))}
             </div>
           )}
-           {!isLoading && !error && ideas.length === 0 && (
+
+          {!isLoading && !error && ideas.length === 0 && (
             <div className="text-center text-gray-500 py-10">
               <p className="text-xl">Your generated ideas will appear here.</p>
               <p>Enter a topic above to get started!</p>
+            </div>
+          )}
+
+          {ideas.length > 0 && (
+            <div className="text-center mt-10">
+              <button
+                onClick={handleLoadMore}
+                disabled={isLoading}
+                className="flex items-center justify-center gap-2 px-8 py-3 mx-auto bg-gray-700 text-cyan-300 font-bold rounded-lg shadow-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500 transition-all duration-300 disabled:bg-gray-600 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Loading More...</span>
+                  </>
+                ) : (
+                  <span>Load More Ideas</span>
+                )}
+              </button>
             </div>
           )}
         </div>
