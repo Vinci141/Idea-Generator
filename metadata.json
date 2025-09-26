@@ -1,0 +1,5 @@
+{
+  "name": "Project Idea Generator",
+  "description": "An AI-powered application that generates innovative project ideas based on user-provided keywords, technologies, or concepts. It helps developers, students, and creators brainstorm their next big project.",
+  "requestFramePermissions": []
+}
