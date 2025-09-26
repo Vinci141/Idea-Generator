@@ -4,7 +4,7 @@ import { InputForm } from './components/InputForm';
 import { IdeaCard } from './components/IdeaCard';
 import { Loader } from './components/Loader';
 import { generateIdeas } from './services/geminiService';
-import { Idea } from './types';
+import { Idea, Difficulty } from './types';
 
 function App() {
   const [prompt, setPrompt] = useState<string>('');
@@ -12,6 +12,7 @@ function App() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('Beginner');
 
   const handleSubmit = async () => {
     if (!prompt.trim() || isLoading) return;
@@ -21,7 +22,7 @@ function App() {
     setIdeas([]); // Clear previous ideas for a new search
 
     try {
-      const generatedIdeas = await generateIdeas(prompt);
+      const generatedIdeas = await generateIdeas(prompt, difficulty);
       setIdeas(generatedIdeas);
       setActivePrompt(prompt); // Set the active prompt for "load more"
       setPrompt(''); // Clear input on success
@@ -42,7 +43,7 @@ function App() {
 
     try {
       const existingTitles = ideas.map((idea) => idea.title);
-      const newIdeas = await generateIdeas(activePrompt, existingTitles);
+      const newIdeas = await generateIdeas(activePrompt, difficulty, existingTitles);
       setIdeas((prevIdeas) => [...prevIdeas, ...newIdeas]);
     } catch (e) {
       setError('Sorry, something went wrong while loading more ideas. Please try again.');
@@ -73,6 +74,21 @@ function App() {
             onSubmit={handleSubmit}
             isLoading={isLoading}
           />
+          <div className="flex justify-center items-center gap-2 p-1 bg-gray-800 rounded-lg mt-4 max-w-sm mx-auto">
+            {(['Beginner', 'Intermediate', 'Advanced'] as Difficulty[]).map((level) => (
+              <button
+                key={level}
+                onClick={() => setDifficulty(level)}
+                className={`w-full px-4 py-2 text-sm font-semibold rounded-md transition-colors duration-200 ${
+                  difficulty === level
+                    ? 'bg-cyan-600 text-white shadow'
+                    : 'text-gray-400 hover:bg-gray-700'
+                }`}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="mt-12 max-w-4xl mx-auto">

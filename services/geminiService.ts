@@ -1,6 +1,6 @@
 // FIX: Implemented Gemini service to generate ideas, resolving "Cannot find name" errors.
 import { GoogleGenAI, Type } from "@google/genai";
-import { Idea } from '../types';
+import { Idea, Difficulty } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
@@ -27,18 +27,22 @@ const responseSchema = {
         items: { type: Type.STRING },
         description: "A list of actionable, step-by-step instructions to build the project.",
       },
+      difficulty: {
+        type: Type.STRING,
+        description: "The difficulty level of the project: 'Beginner', 'Intermediate', or 'Advanced'.",
+      },
       codeSample: {
         type: Type.STRING,
         description: "A small, illustrative code snippet in a relevant language (e.g., JavaScript, Python). Optional.",
       },
     },
-    required: ["title", "description", "tags", "steps"],
+    required: ["title", "description", "tags", "steps", "difficulty"],
   },
 };
 
-export async function generateIdeas(prompt: string, existingTitles: string[] = []): Promise<Idea[]> {
+export async function generateIdeas(prompt: string, difficulty: Difficulty, existingTitles: string[] = []): Promise<Idea[]> {
   try {
-    let fullPrompt = `Generate 3 innovative and detailed project ideas based on the following topic: "${prompt}". For each idea, you must provide: a title, a comprehensive description, a list of relevant technology tags, and a detailed, actionable, step-by-step guide for implementation. Also include an optional brief code sample to illustrate a core concept.`;
+    let fullPrompt = `Generate 3 innovative and detailed project ideas based on the following topic: "${prompt}" for a developer with a "${difficulty}" skill level. For each idea, you must provide: a title, a comprehensive description, a list of relevant technology tags, the correct difficulty level ('Beginner', 'Intermediate', or 'Advanced'), and a detailed, actionable, step-by-step guide for implementation. Also include an optional brief code sample to illustrate a core concept.`;
 
     if (existingTitles.length > 0) {
       fullPrompt += `\n\nPlease ensure these new ideas are distinct and different from the ones already provided: "${existingTitles.join('", "')}".`;
