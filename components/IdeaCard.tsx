@@ -1,7 +1,6 @@
 import React from 'react';
 import { ProjectIdea, Difficulty } from '../types';
-// FIX: Removed unused and non-existent 'ChartBarIcon' import.
-import { CodeBracketIcon } from './Icons';
+import { CodeBracketIcon, ClipboardListIcon } from './Icons';
 
 interface IdeaCardProps {
   idea: ProjectIdea;
@@ -24,19 +23,32 @@ export const IdeaCard: React.FC<IdeaCardProps> = ({ idea }) => {
           {idea.difficulty}
         </span>
       </div>
-      <p className="text-gray-300 mb-5 leading-relaxed">{idea.description}</p>
+      <p className="text-gray-300 mb-6 leading-relaxed">{idea.description}</p>
       
-      <div>
-        <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
-            <CodeBracketIcon className="w-5 h-5" />
-            Suggested Technologies
-        </h4>
-        <div className="flex flex-wrap gap-2">
-          {idea.technologies.map((tech, index) => (
-            <span key={index} className="bg-gray-700 text-gray-200 px-3 py-1 rounded-full text-sm font-medium">
-              {tech}
-            </span>
-          ))}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+              <CodeBracketIcon className="w-5 h-5" />
+              Suggested Technologies
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {idea.technologies.map((tech, index) => (
+              <span key={index} className="bg-gray-700 text-gray-200 px-3 py-1 rounded-full text-sm font-medium">
+                {tech}
+              </span>
+            ))}
+          </div>
+        </div>
+        <div>
+            <h4 className="text-sm font-semibold text-gray-400 mb-3 flex items-center gap-2">
+                <ClipboardListIcon className="w-5 h-5" />
+                Project Steps
+            </h4>
+            <ol className="list-decimal list-inside space-y-2 text-gray-300 text-sm">
+                {idea.steps.map((step, index) => (
+                    <li key={index} className="pl-2">{step}</li>
+                ))}
+            </ol>
         </div>
       </div>
     </div>

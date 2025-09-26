@@ -1,4 +1,3 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { ProjectIdea, Difficulty } from '../types';
 
@@ -32,17 +31,22 @@ const responseSchema = {
             type: Type.STRING,
             enum: [Difficulty.Beginner, Difficulty.Intermediate, Difficulty.Advanced],
             description: "The estimated difficulty level for the project."
+        },
+        steps: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "A list of 5-7 actionable, high-level steps to guide the developer in building the project from start to finish."
         }
       },
-      required: ["title", "description", "technologies", "difficulty"],
+      required: ["title", "description", "technologies", "difficulty", "steps"],
     },
 };
 
-export const generateProjectIdeas = async (topic: string): Promise<ProjectIdea[]> => {
+export const generateProjectIdeas = async (topic: string, difficulty: Difficulty): Promise<ProjectIdea[]> => {
     try {
         const prompt = `
-            Based on the following topic, generate 3 distinct and creative project ideas.
-            For each idea, provide a title, a detailed one-paragraph description, a list of 3-5 relevant technologies, and a difficulty level ('Beginner', 'Intermediate', or 'Advanced').
+            Based on the following topic, generate 3 distinct and creative project ideas suitable for a developer with a '${difficulty}' skill level.
+            For each idea, provide a title, a detailed one-paragraph description, a list of 3-5 relevant technologies, the specified difficulty level ('${difficulty}'), and a list of 5-7 high-level, actionable steps to build the project.
             Ensure your response strictly adheres to the provided JSON schema.
 
             Topic: "${topic}"

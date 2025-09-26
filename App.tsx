@@ -1,6 +1,5 @@
-
 import React, { useState, useCallback } from 'react';
-import { ProjectIdea } from './types';
+import { ProjectIdea, Difficulty } from './types';
 import { generateProjectIdeas } from './services/geminiService';
 import { InputForm } from './components/InputForm';
 import { IdeaCard } from './components/IdeaCard';
@@ -9,6 +8,7 @@ import { SparklesIcon, LightBulbIcon } from './components/Icons';
 
 const App: React.FC = () => {
   const [userInput, setUserInput] = useState<string>('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(Difficulty.Beginner);
   const [projectIdeas, setProjectIdeas] = useState<ProjectIdea[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ const App: React.FC = () => {
     setProjectIdeas([]);
 
     try {
-      const ideas = await generateProjectIdeas(userInput);
+      const ideas = await generateProjectIdeas(userInput, selectedDifficulty);
       setProjectIdeas(ideas);
     } catch (err) {
       setError('Failed to generate ideas. Please check your connection or API key and try again.');
@@ -29,7 +29,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [userInput, isLoading]);
+  }, [userInput, isLoading, selectedDifficulty]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 font-sans p-4 sm:p-6 lg:p-8 flex flex-col items-center">
@@ -42,7 +42,7 @@ const App: React.FC = () => {
             </h1>
           </div>
           <p className="text-lg text-gray-400">
-            Fuel your creativity. Enter a topic and get unique project ideas powered by AI.
+            Fuel your creativity. Enter a topic, choose a difficulty, and get unique project ideas powered by AI.
           </p>
         </header>
 
@@ -53,6 +53,26 @@ const App: React.FC = () => {
             onSubmit={handleSubmit}
             isLoading={isLoading}
           />
+
+          <div className="mt-4 flex justify-center items-center gap-3 bg-gray-800/50 border border-gray-700 p-2 rounded-xl">
+              <span className="text-sm font-semibold text-gray-400 pr-2">Difficulty:</span>
+              {(Object.values(Difficulty) as Difficulty[]).map((level) => (
+                <button
+                  key={level}
+                  onClick={() => setSelectedDifficulty(level)}
+                  disabled={isLoading}
+                  className={`px-4 py-2 text-sm font-bold rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500 disabled:opacity-50
+                    ${selectedDifficulty === level 
+                      ? 'bg-cyan-600 text-white shadow-md' 
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`
+                  }
+                >
+                  {level}
+                </button>
+              ))}
+          </div>
+
 
           {isLoading && <Loader />}
 

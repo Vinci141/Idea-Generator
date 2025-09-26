@@ -1,4 +1,3 @@
-
 export enum Difficulty {
     Beginner = 'Beginner',
     Intermediate = 'Intermediate',
@@ -10,4 +9,5 @@ export interface ProjectIdea {
     description: string;
     technologies: string[];
     difficulty: Difficulty;
+    steps: string[];
 }
